@@ -23,12 +23,12 @@ def connect_to_server():
     s.connect(addr)
     return s
 
-# DHT22 libray is available at
-# https://github.com/danjperron/PicoDHT22
-
 do_connect()
 
-dht_sensor=PicoDHT22(Pin(28,Pin.IN,Pin.PULL_UP),dht11=True)
+# DHT22 libray is available at
+# https://github.com/danjperron/PicoDHT22
+dht_sensor = PicoDHT22(Pin(28,Pin.IN,Pin.PULL_UP),dht11=True)
+
 while True:
     T,H = dht_sensor.read()
     if T is None:
@@ -36,10 +36,17 @@ while True:
     else:
         print("{}'C  {}%".format(T,H))
         data = '{{"temperature": "{}", "humidity": "{}", "room": "obyvak"}}'.format(T,H)
-        s = connect_to_server()
-        request = 'POST /tempMonitor/reportTH HTTP/1.1\r\nHost: 10.0.0.25:8080\r\nContent-Type:application/json\r\nContent-Length:' + str(len(data)) + '\r\n\r\n' + data + '\r\n\r\n'
-        print(request)
-        s.send(request)
-        s.close()
+        try:
+            s = connect_to_server()
+            request = 'POST /tempMonitor/reportTH HTTP/1.1\r\nHost: {}:{}'.format(SERVER_IP, SERVER_PORT) + '\r\nContent-Type:application/json\r\nContent-Length:' + str(len(data)) + '\r\n\r\n' + data + '\r\n\r\n'
+            print(request)
+            sent = s.send(request)
+            # print(sent)
+        except OSError as e:
+            print(e)
+        finally:
+            if s != None:
+                print("Closing socket")
+                s.close()
     #DHT22 not responsive if delay to short
     utime.sleep_ms(15000)
