@@ -45,7 +45,6 @@ while True:
     else:
         print("{}'C  {}%".format(T,H))
         data = '{{"temperature": "{}", "humidity": "{}", "room": "obyvak"}}'.format(T,H)
-        print(len(data))
         s = None
         try:
             s = connect_to_server()
