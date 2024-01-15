@@ -32,26 +32,6 @@ def send_data_over_socket(s, data):
             raise Exception("sending data: socket connection broken")
         total_sent = total_sent + sent
 
-def receive_data_over_socket(s, data_length):
-    chunks = []
-    bytes_received = 0
-    while bytes_received < data_length:
-        chunk = s.recv(min(data_length - bytes_received, 2048))
-        if chunk == b'':
-            raise Exception("receiving data: socket connection broken")
-        chunks.append(chunk)
-        bytes_received = bytes_received + len(chunk)
-    return b''.join(chunks)
-
-def receive_all(s, buffer_size=4096):
-    data = b""
-    while True:
-        chunk = s.recv(buffer_size)
-        if not chunk:
-            break
-        data += chunk
-    return data
-
 do_connect()
 
 # DHT22 libray is available at
@@ -71,10 +51,7 @@ while True:
             s = connect_to_server()
             request = 'POST /tempMonitor/reportTH HTTP/1.1\r\nHost: {}:{} \r\nAccept: */*\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{}'.format(SERVER_IP, SERVER_PORT, len(data), data).encode('UTF-8')
             print(request)
-            #s.sendall(request)
             send_data_over_socket(s, request)
-            #print(receive_data_over_socket(s, 160))
-            #print(receive_all(s))
         except OSError as e:
             print(e)
         except Exception as e:
